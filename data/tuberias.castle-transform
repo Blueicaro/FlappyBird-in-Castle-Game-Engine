@@ -1,0 +1,105 @@
+{
+  "$$ClassName" : "TCastleTransform",
+  "Name" : "tuberia",
+  "$Children" : [
+    {
+      "$$ClassName" : "TCastleImageTransform",
+      "Name" : "HaciaArriba",
+      "TranslationPersistent" : {
+        "$$ClassName" : "TCastleVector3Persistent",
+        "Y" : -3.0000000000000000E+002
+      },
+      "Url" : "castle-data:/assets/pipe/pipe.png",
+      "$Behaviors" : [
+        {
+          "$$ClassName" : "TCastleMeshCollider",
+          "Mode2D" : true,
+          "Name" : "MeshCollider2"
+        },
+        {
+          "$$ClassName" : "TCastleRigidBody",
+          "Dynamic" : false,
+          "Gravity" : false,
+          "LockRotation" : [
+            0,
+            1
+          ],
+          "LockTranslation" : [
+            2
+          ],
+          "Name" : "RigidBody1"
+        }
+      ]
+    },
+    {
+      "$$ClassName" : "TCastleImageTransform",
+      "Name" : "HabiaAbajo",
+      "RotationPersistent" : {
+        "$$ClassName" : "TCastleVector4RotationPersistent",
+        "W" : 3.1415927410125732E+000,
+        "Z" : 1.0000000000000000E+000
+      },
+      "TranslationPersistent" : {
+        "$$ClassName" : "TCastleVector3Persistent",
+        "Y" : 3.0000000000000000E+002
+      },
+      "Url" : "castle-data:/assets/pipe/pipe.png",
+      "$Behaviors" : [
+        {
+          "$$ClassName" : "TCastleMeshCollider",
+          "Mode2D" : true,
+          "Name" : "MeshCollider3"
+        },
+        {
+          "$$ClassName" : "TCastleRigidBody",
+          "Dynamic" : false,
+          "Gravity" : false,
+          "LockRotation" : [
+            0,
+            1
+          ],
+          "LockTranslation" : [
+            2
+          ],
+          "Name" : "RigidBody2"
+        }
+      ]
+    },
+    {
+      "$$ClassName" : "TCastleBox",
+      "CastShadows" : false,
+      "Name" : "BoxPuntos",
+      "RenderOptions" : {
+        "$$ClassName" : "TCastleScene.TSceneRenderOptions"
+      },
+      "SizePersistent" : {
+        "$$ClassName" : "TCastleVector3Persistent",
+        "X" : 3.0000000000000000E+001,
+        "Y" : 1.0000000000000000E+002,
+        "Z" : 1.0000000000000000E+000
+      },
+      "$Behaviors" : [
+        {
+          "$$ClassName" : "TCastleMeshCollider",
+          "Mesh" : "BoxPuntos",
+          "Mode2D" : true,
+          "Name" : "MeshCollider1"
+        },
+        {
+          "$$ClassName" : "TCastleRigidBody",
+          "Dynamic" : false,
+          "Gravity" : false,
+          "LockRotation" : [
+            0,
+            1
+          ],
+          "LockTranslation" : [
+            2
+          ],
+          "Name" : "RigidBody3",
+          "Trigger" : true
+        }
+      ]
+    }
+  ]
+}

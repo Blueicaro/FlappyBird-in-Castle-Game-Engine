@@ -1,5 +1,7 @@
 # Flappy bird
 
+Under development
+
 Using [Castle Game Engine](https://castle-engine.io/).
 
 ## Building

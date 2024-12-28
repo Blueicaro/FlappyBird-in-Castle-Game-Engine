@@ -4,4 +4,5 @@
   <SubTexture x="16" y="1008" name="main_2" width="16" height="16"/>
   <SubTexture x="32" y="1008" name="main_3" width="16" height="16"/>
   <SubTexture x="48" y="1008" name="main_4" width="16" height="16"/>
+  <SubTexture x="64" y="1008" fps="8" name="idle_1" width="16" height="16"/>
 </TextureAtlas>

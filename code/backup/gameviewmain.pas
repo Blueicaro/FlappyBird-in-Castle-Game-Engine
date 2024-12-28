@@ -21,19 +21,21 @@ type
   private
     CuerpoPajaro: TCastleRigidBody;
     Velocidad: TVector3;
-    procedure CuerpoPajaroCollision(
-      const CollisionDetails: TPhysicsCollisionDetails);
+    procedure CuerpoPajaroCollision(const CollisionDetails:
+      TPhysicsCollisionDetails);
     procedure Impulso;
 
   published
     { Components designed using CGE editor.
       These fields will be automatically initialized at Start. }
     LabelFps: TCastleLabel;
+    labelInfo: TCastleLabel;
     bird: TCastleScene;
     Camera1: TCastleCamera;
     Fondo: TCastleTransform;
     Suelo1: TCastleScene;
     Suelo2: TCastleScene;
+    Suelo3: TCastleScene;
   public
     constructor Create(AOwner: TComponent); override;
     procedure Start; override;
@@ -58,7 +60,6 @@ var
   v: TVector3;
 begin
   v := bird.WorldTranslation;
-  WritelnLog(V.ToString);
   CuerpoPajaro.ApplyImpulse(Vector3(V.X, Fuerza, 0), v);
 end;
 
@@ -81,22 +82,16 @@ end;
 procedure TViewMain.Start;
 begin
   inherited;
-  Velocidad := Vector3(-100, 0, 0);
+  VelocidadActual := Vector3(-100, 0, 0);
+  Velocidad := Velocidad;
   CuerpoPajaro := Bird.RigidBody;
   CuerpoPajaro.OnCollisionEnter :=
   {$IFDEF FPC}
- @CuerpoPajaroCollision
+     @CuerpoPajaroCollision;
     {$ELSE}
-    CuerpoPajaroCollision
+    CuerpoPajaroCollision;
   {$ENDIF}
-  ;
 
-  {$IFDEF DEBUG}
- WritelnLog('Posicion suelo 1: ' + FloatToStr(Suelo1.WorldToLocal(Camera1.Translation).x));
-  WritelnLog('Posicion suelo 2: ' + FloatToStr(Suelo2.WorldToLocal(Camera1.Translation).x));
-     WritelnLog('Posicion de la cámara: '+(Camera1.Translation.ToString));
-  bird.RigidBody.LinearVelocity:=Vector3(0,0,0);
-  {$ENDIF}
 end;
 
 procedure TViewMain.Update(const SecondsPassed: single; var HandleInput: boolean);
@@ -107,11 +102,28 @@ begin
     'If you remove LabelFps from the design, remember to remove also the assignment "LabelFps.Caption := ..." from code');
   LabelFps.Caption := 'FPS: ' + Container.Fps.ToString;
 
+  labelInfo.Caption := 'Animación: ' + bird.AutoAnimation +
+    '. Velocidad Y: ' + CuerpoPajaro.LinearVelocity.Y.ToString();
+
+
+  if (Bird.AutoAnimation = 'idle') and (CuerpoPajaro.LinearVelocity.Y > 0) then
+  begin
+    bird.AutoAnimation := 'main';
+  end
+  else if (bird.AutoAnimation = 'main') and (CuerpoPajaro.LinearVelocity.Y < 0) then
+  begin
+    bird.AutoAnimation := 'idle';
+  end;
+
+  //Pooling
+
+
   if (Suelo1.Translation.x < -1024) then
   begin
-     Suelo1.Translation := Suelo2.Translation+Vector3(1024-(1024*SecondsPassed),0,0);
-  //  Suelo1.Translation := Suelo1.Translation + Velocidad * SecondsPassed;
-    WritelnLog('Suelo 1:'+Suelo1.Translation.ToString);
+    Suelo1.Translation := Suelo3.Translation + Vector3(1024, 0, 0) +
+      Velocidad * SecondsPassed;
+    WritelnLog('Suelo 1:' + Suelo1.Translation.ToString);
+    WritelnLog('Update', bird.AutoAnimation);
   end
   else
   begin
@@ -120,14 +132,27 @@ begin
 
   if (Suelo2.Translation.x < -1024) then
   begin
-    Suelo2.Translation := Suelo1.Translation+Vector3(1020,0,0);
-  //  Suelo2.Translation := Suelo2.Translation + Velocidad * SecondsPassed;
-     WritelnLog('Suelo 2:'+Suelo1.Translation.ToString);
+    Suelo2.Translation := Suelo1.Translation + Vector3(1024, 0, 0) +
+      Velocidad * SecondsPassed;
+    WritelnLog('Suelo 2:' + Suelo2.Translation.ToString);
+    WritelnLog('Update', bird.AutoAnimation);
   end
   else
   begin
     Suelo2.Translation := Suelo2.Translation + Velocidad * SecondsPassed;
   end;
+  if Suelo3.Translation.X < -1024 then
+  begin
+    Suelo3.Translation := Suelo2.Translation + Vector3(1024, 0, 0) +
+      Velocidad * SecondsPassed;
+    WritelnLog('Suelo 3:' + Suelo3.Translation.ToString);
+
+  end
+  else
+  begin
+    Suelo3.Translation := Suelo3.Translation + Velocidad * SecondsPassed;
+  end;
+
 end;
 
 function TViewMain.Press(const Event: TInputPressRelease): boolean;
@@ -137,6 +162,7 @@ begin
   if Event.IsKey(keySpace) then
   begin
     Impulso;
+    WritelnLog('Press', bird.AutoAnimation);
     Exit(True);
   end;
   if Event.IsKey(keyEscape) then
@@ -150,9 +176,6 @@ begin
       if bird.RigidBody.LinearVelocity.X > 0 then
       begin
       bird.RigidBody.LinearVelocity:= Vector3(0,0,0);
-       WritelnLog('Posicion suelo 1: ' + FloatToStr(Suelo1.WorldToLocal(Camera1.Translation).x));
-       WritelnLog('Posicion suelo 2: ' + FloatToStr(Suelo2.WorldToLocal(Camera1.Translation).x));
-       WritelnLog('Posicion de la cámara: '+(Camera1.Translation.ToString));
       end
       else
       begin
