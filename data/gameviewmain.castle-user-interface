@@ -315,8 +315,7 @@
             "Name" : "DesignTuberias1",
             "TranslationPersistent" : {
               "$$ClassName" : "TCastleVector3Persistent",
-              "X" : 3.5212292480468750E+002,
-              "Z" : -4.0000000000000000E+000
+              "X" : 4.0000000000000000E+002
             },
             "Url" : "castle-data:/tuberias.castle-transform"
           }
@@ -330,7 +329,7 @@
         "Name" : "",
         "Orthographic" : {
           "$$ClassName" : "TCastleOrthographic",
-          "Height" : 1.2765571289062500E+003,
+          "Height" : 1.3645618896484375E+003,
           "OriginPersistent" : {
             "$$ClassName" : "TCastleVector2Persistent",
             "X" : 5.0000000000000000E-001,

@@ -78,6 +78,7 @@
         "Y" : 1.0000000000000000E+002,
         "Z" : 1.0000000000000000E+000
       },
+      "Visible" : false,
       "$Behaviors" : [
         {
           "$$ClassName" : "TCastleMeshCollider",

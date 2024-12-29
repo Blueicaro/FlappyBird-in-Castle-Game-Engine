@@ -36,6 +36,7 @@ type
     Suelo1: TCastleScene;
     Suelo2: TCastleScene;
     Suelo3: TCastleScene;
+    DesignTuberias1 : TCastleTransformDesign;
   public
     constructor Create(AOwner: TComponent); override;
     procedure Start; override;
@@ -66,7 +67,8 @@ end;
 procedure TViewMain.CuerpoPajaroCollision(
   const CollisionDetails: TPhysicsCollisionDetails);
 begin
-  if CollisionDetails.Transforms[1].Name <> 'Techo' then
+  WritelnLog(CollisionDetails.Transforms[1].Name);
+  if (CollisionDetails.Transforms[1].Name <> 'Techo') or (CollisionDetails.Transforms[1].Name <> 'BoxPuntos')  then
   begin
     Velocidad := Vector3(0, 0, 0);
     bird.StopAnimation();
@@ -82,8 +84,7 @@ end;
 procedure TViewMain.Start;
 begin
   inherited;
-  VelocidadActual := Vector3(-100, 0, 0);
-  Velocidad := Velocidad;
+  Velocidad := Vector3(-150, 0, 0);
   CuerpoPajaro := Bird.RigidBody;
   CuerpoPajaro.OnCollisionEnter :=
   {$IFDEF FPC}
@@ -115,8 +116,11 @@ begin
     bird.AutoAnimation := 'idle';
   end;
 
-  //Pooling
+  //Pipe Pooling
 
+  DesignTuberias1.Translation := DesignTuberias1.Translation+Velocidad*SecondsPassed;
+
+  //Ground Pooling
 
   if (Suelo1.Translation.x < -1024) then
   begin
