@@ -10,7 +10,7 @@ interface
 uses Classes,
   CastleVectors, CastleComponentSerialize,
   CastleUIControls, CastleControls, CastleKeysMouse, CastleScene,
-  CastleTransform, CastleWindow, CastleLog, CastleVectorsInternalSingle;
+  CastleTransform, CastleWindow, CastleLog, CastleVectorsInternalSingle, CastleViewport;
 
 type
   { Main view, where most of the application logic takes place. }
@@ -21,8 +21,9 @@ type
   private
     CuerpoPajaro: TCastleRigidBody;
     Velocidad: TVector3;
-    procedure CuerpoPajaroCollision(const CollisionDetails:
-      TPhysicsCollisionDetails);
+    TuberiaTemplate: TCastleComponentFactory;
+    procedure CuerpoPajaroCollision(
+      const CollisionDetails: TPhysicsCollisionDetails);
     procedure Impulso;
 
   published
@@ -36,7 +37,8 @@ type
     Suelo1: TCastleScene;
     Suelo2: TCastleScene;
     Suelo3: TCastleScene;
-    DesignTuberias1 : TCastleTransformDesign;
+    DesignTuberias1: TCastleTransformDesign;
+    Viewport1: TCastleViewport;
   public
     constructor Create(AOwner: TComponent); override;
     procedure Start; override;
@@ -68,7 +70,8 @@ procedure TViewMain.CuerpoPajaroCollision(
   const CollisionDetails: TPhysicsCollisionDetails);
 begin
   WritelnLog(CollisionDetails.Transforms[1].Name);
-  if (CollisionDetails.Transforms[1].Name <> 'Techo') and (CollisionDetails.Transforms[1].Name <> 'BoxPuntos')  then
+  if (CollisionDetails.Transforms[1].Name <> 'Techo') and
+    (CollisionDetails.Transforms[1].Name <> 'BoxPuntos') then
   begin
     Velocidad := Vector3(0, 0, 0);
     bird.StopAnimation();
@@ -93,6 +96,8 @@ begin
     CuerpoPajaroCollision;
   {$ENDIF}
 
+  TuberiaTemplate := TCastleComponentFactory.Create(FreeAtStop);
+  TuberiaTemplate.url := ('castle-data:/tuberias.castle-transform');
 end;
 
 procedure TViewMain.Update(const SecondsPassed: single; var HandleInput: boolean);
@@ -118,7 +123,7 @@ begin
 
   //Pipe Pooling
 
-  DesignTuberias1.Translation := DesignTuberias1.Translation+Velocidad*SecondsPassed;
+  DesignTuberias1.Translation := DesignTuberias1.Translation + Velocidad * SecondsPassed;
 
   //Ground Pooling
 
@@ -160,6 +165,8 @@ begin
 end;
 
 function TViewMain.Press(const Event: TInputPressRelease): boolean;
+var
+  Tuberia: TCastleTransform;
 begin
   Result := inherited;
   if Result then Exit; // allow the ancestor to handle keys
@@ -177,15 +184,11 @@ begin
   {$IFDEF DEBUG}
     if Event.IsKey(keyEnter) then
     begin
-      if bird.RigidBody.LinearVelocity.X > 0 then
-      begin
-      bird.RigidBody.LinearVelocity:= Vector3(0,0,0);
-      end
-      else
-      begin
-        bird.RigidBody.LinearVelocity:= Vector3(100,0,0);
-      end;
-
+   // Tuberia := DesignTuberias1.Create(FreeAtStop);
+   // Tuberia := TuberiaTemplate.ComponentLoad(DesignTuberias1) as TCastleTransformDesign;
+    Tuberia := TransformLoad('castle-data:/tuberias.castle-transform',FreeAtStop) as TCastleTransform;
+    Tuberia.Translation := Vector3 (0,0,0);
+    Viewport1.Items.Add(Tuberia);
     end;
   {$ENDIF}
 end;

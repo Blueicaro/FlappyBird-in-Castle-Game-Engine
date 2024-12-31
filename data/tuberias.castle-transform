@@ -12,11 +12,6 @@
       "Url" : "castle-data:/assets/pipe/pipe.png",
       "$Behaviors" : [
         {
-          "$$ClassName" : "TCastleMeshCollider",
-          "Mode2D" : true,
-          "Name" : "MeshCollider2"
-        },
-        {
           "$$ClassName" : "TCastleRigidBody",
           "Dynamic" : false,
           "Gravity" : false,
@@ -28,6 +23,10 @@
             2
           ],
           "Name" : "RigidBody1"
+        },
+        {
+          "$$ClassName" : "TCastleBoxCollider",
+          "Name" : "BoxCollider3"
         }
       ]
     },
@@ -46,12 +45,8 @@
       "Url" : "castle-data:/assets/pipe/pipe.png",
       "$Behaviors" : [
         {
-          "$$ClassName" : "TCastleMeshCollider",
-          "Mode2D" : true,
-          "Name" : "MeshCollider3"
-        },
-        {
           "$$ClassName" : "TCastleRigidBody",
+          "Animated" : true,
           "Dynamic" : false,
           "Gravity" : false,
           "LockRotation" : [
@@ -62,6 +57,10 @@
             2
           ],
           "Name" : "RigidBody2"
+        },
+        {
+          "$$ClassName" : "TCastleBoxCollider",
+          "Name" : "BoxCollider2"
         }
       ]
     },
@@ -88,6 +87,7 @@
         },
         {
           "$$ClassName" : "TCastleRigidBody",
+          "Animated" : true,
           "Dynamic" : false,
           "Gravity" : false,
           "LockRotation" : [
