@@ -3,14 +3,16 @@
   Feel free to use this code as a starting point for your own projects.
   This template code is in public domain, unlike most other CGE code which
   is covered by BSD or LGPL (see https://castle-engine.io/license). }
+{$mode objfpc}{$H+}
 unit GameViewMain;
 
 interface
 
-uses Classes,
+uses Classes, fgl,
   CastleVectors, CastleComponentSerialize,
   CastleUIControls, CastleControls, CastleKeysMouse, CastleScene,
-  CastleTransform, CastleWindow, CastleLog, CastleVectorsInternalSingle, CastleViewport;
+  CastleTransform, CastleWindow, CastleLog, CastleVectorsInternalSingle,
+  CastleViewport;
 
 type
   { Main view, where most of the application logic takes place. }
@@ -19,28 +21,34 @@ type
 
   TViewMain = class(TCastleView)
   private
+    Puntuacion: integer;
     CuerpoPajaro: TCastleRigidBody;
     Velocidad: TVector3;
-    TuberiaTemplate: TCastleComponentFactory;
+    TuberiaFactory: TCastleComponentFactory;
+
+
     procedure CuerpoPajaroCollision(
       const CollisionDetails: TPhysicsCollisionDetails);
     procedure Impulso;
+
 
   published
     { Components designed using CGE editor.
       These fields will be automatically initialized at Start. }
     LabelFps: TCastleLabel;
     labelInfo: TCastleLabel;
+    LabelPuntos: TCastleLabel;
     bird: TCastleScene;
     Camera1: TCastleCamera;
     Fondo: TCastleTransform;
     Suelo1: TCastleScene;
     Suelo2: TCastleScene;
     Suelo3: TCastleScene;
-    DesignTuberias1: TCastleTransformDesign;
-    Viewport1: TCastleViewport;
+    MainViewPort: TCastleViewport;
+    Tuberias: TCastleTransform;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
     procedure Start; override;
     procedure Update(const SecondsPassed: single; var HandleInput: boolean); override;
     function Press(const Event: TInputPressRelease): boolean; override;
@@ -56,6 +64,8 @@ implementation
 
 uses SysUtils;
 
+
+
   { TViewMain ----------------------------------------------------------------- }
 
 procedure TViewMain.Impulso;
@@ -66,17 +76,30 @@ begin
   CuerpoPajaro.ApplyImpulse(Vector3(V.X, Fuerza, 0), v);
 end;
 
+
+
 procedure TViewMain.CuerpoPajaroCollision(
   const CollisionDetails: TPhysicsCollisionDetails);
 begin
-  WritelnLog(CollisionDetails.Transforms[1].Name);
-  if (CollisionDetails.Transforms[1].Name <> 'Techo') and
-    (CollisionDetails.Transforms[1].Name <> 'BoxPuntos') then
+
+  if (CollisionDetails.Transforms[1].Name = 'Techo') or
+    (CollisionDetails.Transforms[1].Name = 'Suelo1') or
+    (CollisionDetails.Transforms[1].Name = 'Suelo2') or
+    (CollisionDetails.Transforms[1].Name = 'Suelo3') then
   begin
     Velocidad := Vector3(0, 0, 0);
     bird.StopAnimation();
+    WritelnLog('Colision Pajaro: ', CollisionDetails.Transforms[1].Name);
   end;
+  //else if CollisionDetails.OtherTransform.RigidBody.Trigger = True then
+  //begin
+  //  //Añadir puntuacion
+  //  Puntuacion := Puntuacion + 1;
+  //  LabelPuntos.Caption := IntToStr(Puntuacion);
+  //end;
 end;
+
+
 
 constructor TViewMain.Create(AOwner: TComponent);
 begin
@@ -84,9 +107,15 @@ begin
   DesignUrl := 'castle-data:/gameviewmain.castle-user-interface';
 end;
 
+destructor TViewMain.Destroy;
+begin
+  inherited Destroy;
+end;
+
 procedure TViewMain.Start;
 begin
   inherited;
+  Puntuacion := 0;
   Velocidad := Vector3(-150, 0, 0);
   CuerpoPajaro := Bird.RigidBody;
   CuerpoPajaro.OnCollisionEnter :=
@@ -95,12 +124,14 @@ begin
     {$ELSE}
     CuerpoPajaroCollision;
   {$ENDIF}
-
-  TuberiaTemplate := TCastleComponentFactory.Create(FreeAtStop);
-  TuberiaTemplate.url := ('castle-data:/tuberias.castle-transform');
+  TuberiaFactory := TCastleComponentFactory.Create(FreeAtStop);
+  TuberiaFactory.url := ('castle-data:/tuberias.castle-transform');
 end;
 
 procedure TViewMain.Update(const SecondsPassed: single; var HandleInput: boolean);
+var
+  I: integer;
+  TuberiaActual: TCastleTransform;
 begin
   inherited;
   { This virtual method is executed every frame (many times per second). }
@@ -122,11 +153,20 @@ begin
   end;
 
   //Pipe Pooling
-
-  DesignTuberias1.Translation := DesignTuberias1.Translation + Velocidad * SecondsPassed;
+  for I := Tuberias.Count - 1 downto 0 do
+  begin
+    if Tuberias.Items[I].Translation.X < -1100 then
+    begin
+       Tuberias.RemoveDelayed(Tuberias.Items[I],Free);
+    end
+    else
+    begin
+      Tuberias.Items[I].Translation :=
+      Tuberias.Items[I].Translation + Velocidad * SecondsPassed;
+    end;
+  end;
 
   //Ground Pooling
-
   if (Suelo1.Translation.x < -1024) then
   begin
     Suelo1.Translation := Suelo3.Translation + Vector3(1024, 0, 0) +
@@ -155,7 +195,6 @@ begin
     Suelo3.Translation := Suelo2.Translation + Vector3(1024, 0, 0) +
       Velocidad * SecondsPassed;
     WritelnLog('Suelo 3:' + Suelo3.Translation.ToString);
-
   end
   else
   begin
@@ -184,11 +223,9 @@ begin
   {$IFDEF DEBUG}
     if Event.IsKey(keyEnter) then
     begin
-   // Tuberia := DesignTuberias1.Create(FreeAtStop);
-   // Tuberia := TuberiaTemplate.ComponentLoad(DesignTuberias1) as TCastleTransformDesign;
-    Tuberia := TransformLoad('castle-data:/tuberias.castle-transform',FreeAtStop) as TCastleTransform;
-    Tuberia.Translation := Vector3 (2048,300,0);
-    Viewport1.Items.Add(Tuberia);
+      Tuberia := TuberiaFactory.ComponentLoad(FreeAtStop) as TCastleTransform;
+      Tuberias.Add(Tuberia);
+      Tuberia.Translation :=Vector3(0,0,0);
     end;
   {$ENDIF}
 end;
