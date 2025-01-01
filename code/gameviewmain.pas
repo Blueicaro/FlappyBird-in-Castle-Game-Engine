@@ -27,8 +27,8 @@ type
     TuberiaFactory: TCastleComponentFactory;
 
 
-    procedure CuerpoPajaroCollision(
-      const CollisionDetails: TPhysicsCollisionDetails);
+    procedure CuerpoPajaroCollision(const CollisionDetails:
+      TPhysicsCollisionDetails);
     procedure Impulso;
 
 
@@ -90,13 +90,13 @@ begin
     Velocidad := Vector3(0, 0, 0);
     bird.StopAnimation();
     WritelnLog('Colision Pajaro: ', CollisionDetails.Transforms[1].Name);
+  end
+  else if CollisionDetails.OtherTransform.RigidBody.Trigger = True then
+  begin
+    //Añadir puntuación
+    Puntuacion := Puntuacion + 1;
+    LabelPuntos.Caption := IntToStr(Puntuacion);
   end;
-  //else if CollisionDetails.OtherTransform.RigidBody.Trigger = True then
-  //begin
-  //  //Añadir puntuacion
-  //  Puntuacion := Puntuacion + 1;
-  //  LabelPuntos.Caption := IntToStr(Puntuacion);
-  //end;
 end;
 
 
@@ -155,14 +155,23 @@ begin
   //Pipe Pooling
   for I := Tuberias.Count - 1 downto 0 do
   begin
-    if Tuberias.Items[I].Translation.X < -1100 then
+    if (Tuberias.Items[I].Translation.X < -1100) and
+      (Tuberias.Items[I].Exists = True) then
     begin
-       Tuberias.RemoveDelayed(Tuberias.Items[I],True);
+      Tuberias.Items[I].Exists := False;
+    end
+    else if Tuberias.Items[I].Exists = True then
+    begin
+      Tuberias.Items[I].Translation :=
+        Tuberias.Items[I].Translation + Velocidad * SecondsPassed;
     end
     else
     begin
-      Tuberias.Items[I].Translation :=
-      Tuberias.Items[I].Translation + Velocidad * SecondsPassed;
+      WritelnLog('Tuberias existe:' + BoolToStr(Tuberias.Items[I].Exists, True) +
+        '-' + IntToStr(Tuberias.Count));
+      Tuberias.Parent.RemoveDelayed(Tuberias.Items[I], True);
+      WritelnLog('Tuberias existe:' + BoolToStr(Tuberias.Items[I].Exists, True) +
+        '-' + IntToStr(Tuberias.Count));
     end;
   end;
 
@@ -171,8 +180,6 @@ begin
   begin
     Suelo1.Translation := Suelo3.Translation + Vector3(1024, 0, 0) +
       Velocidad * SecondsPassed;
-    WritelnLog('Suelo 1:' + Suelo1.Translation.ToString);
-    WritelnLog('Update', bird.AutoAnimation);
   end
   else
   begin
@@ -183,8 +190,6 @@ begin
   begin
     Suelo2.Translation := Suelo1.Translation + Vector3(1024, 0, 0) +
       Velocidad * SecondsPassed;
-    WritelnLog('Suelo 2:' + Suelo2.Translation.ToString);
-    WritelnLog('Update', bird.AutoAnimation);
   end
   else
   begin
@@ -194,7 +199,6 @@ begin
   begin
     Suelo3.Translation := Suelo2.Translation + Vector3(1024, 0, 0) +
       Velocidad * SecondsPassed;
-    WritelnLog('Suelo 3:' + Suelo3.Translation.ToString);
   end
   else
   begin
@@ -212,7 +216,6 @@ begin
   if Event.IsKey(keySpace) then
   begin
     Impulso;
-    WritelnLog('Press', bird.AutoAnimation);
     Exit(True);
   end;
   if Event.IsKey(keyEscape) then
@@ -226,6 +229,7 @@ begin
       Tuberia := TuberiaFactory.ComponentLoad(FreeAtStop) as TCastleTransform;
       Tuberias.Add(Tuberia);
       Tuberia.Translation :=Vector3(0,0,0);
+      Exit(true);
     end;
   {$ENDIF}
 end;

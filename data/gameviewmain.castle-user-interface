@@ -211,7 +211,8 @@
             },
             "TranslationPersistent" : {
               "$$ClassName" : "TCastleVector3Persistent",
-              "Y" : -3.0000000000000000E+002
+              "Y" : -3.0000000000000000E+002,
+              "Z" : 1.0000000000000000E+001
             },
             "Url" : "castle-data:/assets/ground/ground.png",
             "$Behaviors" : [
@@ -249,7 +250,8 @@
             "TranslationPersistent" : {
               "$$ClassName" : "TCastleVector3Persistent",
               "X" : 2.0480000000000000E+003,
-              "Y" : -3.0000000000000000E+002
+              "Y" : -3.0000000000000000E+002,
+              "Z" : 1.0000000000000000E+001
             },
             "Url" : "castle-data:/assets/ground/ground.png",
             "$Behaviors" : [
@@ -287,7 +289,8 @@
             "TranslationPersistent" : {
               "$$ClassName" : "TCastleVector3Persistent",
               "X" : 1.0240000000000000E+003,
-              "Y" : -3.0000000000000000E+002
+              "Y" : -3.0000000000000000E+002,
+              "Z" : 1.0000000000000000E+001
             },
             "Url" : "castle-data:/assets/ground/ground.png",
             "$Behaviors" : [
@@ -323,12 +326,20 @@
       "Name" : "MainViewPort",
       "VerticalAnchorParent" : "vpMiddle",
       "VerticalAnchorSelf" : "vpMiddle",
+      "$NonVisualComponents" : [
+        {
+          "$$ClassName" : "TCastleFont",
+          "DistanceField" : true,
+          "Name" : "Fuente",
+          "Url" : "castle-data:/assets/fonts/BirdFly.ttf"
+        }
+      ],
       "InternalDesignCamera" : {
         "$$ClassName" : "TCastleCamera",
         "Name" : "",
         "Orthographic" : {
           "$$ClassName" : "TCastleOrthographic",
-          "Height" : 1.2673708496093750E+003,
+          "Height" : 1.4972216796875000E+003,
           "OriginPersistent" : {
             "$$ClassName" : "TCastleVector2Persistent",
             "X" : 5.0000000000000000E-001,
@@ -368,9 +379,9 @@
       "$$ClassName" : "TCastleLabel",
       "ColorPersistent" : {
         "$$ClassName" : "TCastleColorPersistent",
-        "Blue" : 1.7647059261798859E-001,
-        "Green" : 6.1176472902297974E-001,
-        "Red" : 9.8823529481887817E-001
+        "Blue" : 9.8823529481887817E-001,
+        "Green" : 5.0588238239288330E-001,
+        "Red" : 3.6078432202339172E-001
       },
       "FontSize" : 2.0000000000000000E+001,
       "HorizontalAnchorParent" : "hpRight",
@@ -411,10 +422,12 @@
       "$$ClassName" : "TCastleLabel",
       "ColorPersistent" : {
         "$$ClassName" : "TCastleColorPersistent",
-        "Blue" : 1.7647059261798859E-001,
-        "Green" : 6.1176472902297974E-001,
-        "Red" : 9.8823529481887817E-001
+        "Blue" : 9.8823529481887817E-001,
+        "Green" : 5.0588238239288330E-001,
+        "Red" : 3.6078432202339172E-001
       },
+      "CustomFont" : "Fuente",
+      "FontScale" : 5.0000000000000000E+000,
       "HorizontalAnchorParent" : "hpMiddle",
       "HorizontalAnchorSelf" : "hpMiddle",
       "Name" : "labelPuntos",
@@ -423,8 +436,9 @@
       ],
       "TranslationPersistent" : {
         "$$ClassName" : "TCastleVector2Persistent",
-        "Y" : -3.2000000000000000E+002
+        "Y" : -3.0000000000000000E+002
       },
+      "VerticalAlignment" : "vpTop",
       "VerticalAnchorParent" : "vpTop",
       "VerticalAnchorSelf" : "vpTop"
     }
