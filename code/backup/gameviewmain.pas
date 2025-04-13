@@ -27,8 +27,8 @@ type
     TuberiaFactory: TCastleComponentFactory;
 
 
-    procedure CuerpoPajaroCollision(const CollisionDetails:
-      TPhysicsCollisionDetails);
+    procedure CuerpoPajaroCollision(
+      const CollisionDetails: TPhysicsCollisionDetails);
     procedure Impulso;
 
 
@@ -62,7 +62,7 @@ var
 
 implementation
 
-uses SysUtils;
+uses SysUtils, Math;
 
 
 
@@ -82,21 +82,24 @@ procedure TViewMain.CuerpoPajaroCollision(
   const CollisionDetails: TPhysicsCollisionDetails);
 begin
 
-  if (CollisionDetails.Transforms[1].Name = 'Techo') or
-    (CollisionDetails.Transforms[1].Name = 'Suelo1') or
+  if (CollisionDetails.Transforms[1].Name = 'Suelo1') or
     (CollisionDetails.Transforms[1].Name = 'Suelo2') or
     (CollisionDetails.Transforms[1].Name = 'Suelo3') then
   begin
     Velocidad := Vector3(0, 0, 0);
     bird.StopAnimation();
     WritelnLog('Colision Pajaro: ', CollisionDetails.Transforms[1].Name);
+  end
+  else if CollisionDetails.OtherTransform.RigidBody.Trigger = True then
+  begin
+    //Añadir puntuación
+    Puntuacion := Puntuacion + 1;
+    LabelPuntos.Caption := IntToStr(Puntuacion);
+  end
+  else if (CollisionDetails.Transforms[1].Name = 'Techo') then
+  begin
+    CuerpoPajaro.LinearVelocity := -CuerpoPajaro.LinearVelocity;
   end;
-  //else if CollisionDetails.OtherTransform.RigidBody.Trigger = True then
-  //begin
-  //  //Añadir puntuación
-  //  Puntuacion := Puntuacion + 1;
-  //  LabelPuntos.Caption := IntToStr(Puntuacion);
-  //end;
 end;
 
 
@@ -129,18 +132,42 @@ begin
 end;
 
 procedure TViewMain.Update(const SecondsPassed: single; var HandleInput: boolean);
+
+
+{
+ Actualiza la velocidad de desplazamiento en función de la velocidad
+ vertical del pájaro. F(x)=2EX
+ Dónde X es la velocidad vertical del pájaro. Y es la velocidad
+ de los objectos. Velocidad lineal
+}
+  function UpdateSpeed: TVector3;
+  var
+    X: TGenericScalar;
+    Y: Float;
+  begin
+    X := CuerpoPajaro.LinearVelocity.Y;
+    X := Abs(X);
+    Y := Power(2, X);
+
+    Result := Velocidad * Vector3(1, 0, 0);
+    //Result := Velocidad;
+  end;
+
 var
   I: integer;
   TuberiaActual: TCastleTransform;
+  VelocidadActual: TVector3;
 begin
   inherited;
   { This virtual method is executed every frame (many times per second). }
   Assert(LabelFps <> nil,
     'If you remove LabelFps from the design, remember to remove also the assignment "LabelFps.Caption := ..." from code');
   LabelFps.Caption := 'FPS: ' + Container.Fps.ToString;
-
+  VelocidadActual := UpdateSpeed;
   labelInfo.Caption := 'Animación: ' + bird.AutoAnimation +
-    '. Velocidad Y: ' + CuerpoPajaro.LinearVelocity.Y.ToString();
+    '. Velocidad Y: ' + CuerpoPajaro.LinearVelocity.Y.ToString() +
+    '. VelocidadActual: ' + VelocidadActual.ToString;
+
 
 
   if (Bird.AutoAnimation = 'idle') and (CuerpoPajaro.LinearVelocity.Y > 0) then
@@ -163,7 +190,7 @@ begin
     else if Tuberias.Items[I].Exists = True then
     begin
       Tuberias.Items[I].Translation :=
-        Tuberias.Items[I].Translation + Velocidad * SecondsPassed;
+        Tuberias.Items[I].Translation + VelocidadActual * SecondsPassed;
     end
     else
     begin
@@ -179,17 +206,17 @@ begin
   if (Suelo1.Translation.x < -1024) then
   begin
     Suelo1.Translation := Suelo3.Translation + Vector3(1024, 0, 0) +
-      Velocidad * SecondsPassed;
+      VelocidadActual * SecondsPassed;
   end
   else
   begin
-    Suelo1.Translation := Suelo1.Translation + Velocidad * SecondsPassed;
+    Suelo1.Translation := Suelo1.Translation + VelocidadActual * SecondsPassed;
   end;
 
   if (Suelo2.Translation.x < -1024) then
   begin
     Suelo2.Translation := Suelo1.Translation + Vector3(1024, 0, 0) +
-      Velocidad * SecondsPassed;
+      VelocidadActual * SecondsPassed;
   end
   else
   begin
@@ -198,11 +225,11 @@ begin
   if Suelo3.Translation.X < -1024 then
   begin
     Suelo3.Translation := Suelo2.Translation + Vector3(1024, 0, 0) +
-      Velocidad * SecondsPassed;
+      VelocidadActual * SecondsPassed;
   end
   else
   begin
-    Suelo3.Translation := Suelo3.Translation + Velocidad * SecondsPassed;
+    Suelo3.Translation := Suelo3.Translation + VelocidadActual * SecondsPassed;
   end;
 
 end;
