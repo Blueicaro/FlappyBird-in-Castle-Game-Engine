@@ -62,7 +62,7 @@ var
 
 implementation
 
-uses SysUtils, Math;
+uses SysUtils, Math, Gametuberias;
 
 
 
@@ -80,8 +80,10 @@ end;
 
 procedure TViewMain.CuerpoPajaroCollision(
   const CollisionDetails: TPhysicsCollisionDetails);
+var
+  I: integer;
 begin
-
+  WritelnLog('Colision:' + CollisionDetails.Transforms[1].Name);
   if (CollisionDetails.Transforms[1].Name = 'Suelo1') or
     (CollisionDetails.Transforms[1].Name = 'Suelo2') or
     (CollisionDetails.Transforms[1].Name = 'Suelo3') then
@@ -98,7 +100,15 @@ begin
   end
   else if (CollisionDetails.Transforms[1].Name = 'Techo') then
   begin
-    CuerpoPajaro.LinearVelocity := - CuerpoPajaro.LinearVelocity;
+    CuerpoPajaro.LinearVelocity := -CuerpoPajaro.LinearVelocity;
+  end
+  else
+  begin
+    for I := Tuberias.Count - 1 downto 0 do
+    begin
+      Tuberias.Items[I].Exists := False;
+    end;
+    Velocidad := Vector3(0, 0, 0);
   end;
 end;
 
@@ -140,6 +150,8 @@ procedure TViewMain.Update(const SecondsPassed: single; var HandleInput: boolean
  Dónde X es la velocidad vertical del pájaro. Y es la velocidad
  de los objectos. Velocidad lineal
 }
+{ #todo : Pendiente de implementar
+ }
   function UpdateSpeed: TVector3;
   var
     X: TGenericScalar;
@@ -157,6 +169,8 @@ var
   I: integer;
   TuberiaActual: TCastleTransform;
   VelocidadActual: TVector3;
+  T: TTuberiaBehaivor;
+  Remove: TRemoveType;
 begin
   inherited;
   { This virtual method is executed every frame (many times per second). }
@@ -178,30 +192,52 @@ begin
   begin
     bird.AutoAnimation := 'idle';
   end;
-
-  //Pipe Pooling
   for I := Tuberias.Count - 1 downto 0 do
   begin
-    if (Tuberias.Items[I].Translation.X < -1100) and
-      (Tuberias.Items[I].Exists = True) then
+    TuberiaActual := Tuberias.Items[I];
+    if TuberiaActual.Exists then
     begin
-      Tuberias.Items[I].Exists := False;
-    end
-    else if Tuberias.Items[I].Exists = True then
-    begin
-      Tuberias.Items[I].Translation :=
-        Tuberias.Items[I].Translation + VelocidadActual * SecondsPassed;
-    end
-    else
-    begin
-      WritelnLog('Tuberias existe:' + BoolToStr(Tuberias.Items[I].Exists, True) +
-        '-' + IntToStr(Tuberias.Count));
-      Tuberias.Parent.RemoveDelayed(Tuberias.Items[I], True);
-      WritelnLog('Tuberias existe:' + BoolToStr(Tuberias.Items[I].Exists, True) +
-        '-' + IntToStr(Tuberias.Count));
+      T := Tuberias.Items[I].FindBehavior(TTuberiaBehaivor) as TTuberiaBehaivor;
+      if T <> nil then
+      begin
+        T.Update(SecondsPassed, Remove);
+        if remove <> rtNone then
+        begin
+          WritelnLog('Remove it');
+          Tuberias.Items[I].Exists := False;
+        end;
+      end
+      else
+      begin
+        Tuberias.Items[I].Exists := False;
+      end;
     end;
   end;
 
+
+  //for I := Tuberias.Count - 1 downto 0 do
+  //begin
+  //  if (Tuberias.Items[I].Translation.X < -1100) and
+  //    (Tuberias.Items[I].Exists = True) then
+  //  begin
+  //    Tuberias.Items[I].Exists := False;
+  //  end
+  //  else if Tuberias.Items[I].Exists = True then
+  //  begin
+  //    Tuberias.Items[I].Translation :=
+  //      Tuberias.Items[I].Translation + VelocidadActual * SecondsPassed;
+  //    TuberiaActual := Tuberias.Items[I];
+  //    T := TuberiaActual.FindBehavior(TTuberiaDesign);
+  //  end
+  //  else
+  //  begin
+  //    WritelnLog('Tuberias existe:' + BoolToStr(Tuberias.Items[I].Exists, True) +
+  //      '-' + IntToStr(Tuberias.Count));
+  //    Tuberias.Parent.RemoveDelayed(Tuberias.Items[I], True);
+  //    WritelnLog('Tuberias existe:' + BoolToStr(Tuberias.Items[I].Exists, True) +
+  //      '-' + IntToStr(Tuberias.Count));
+  //  end;
+  //end;
   //Ground Pooling
   if (Suelo1.Translation.x < -1024) then
   begin
@@ -237,6 +273,8 @@ end;
 function TViewMain.Press(const Event: TInputPressRelease): boolean;
 var
   Tuberia: TCastleTransform;
+  TuberiaDesign: TTuberiaDesign;
+  B: TTuberiaBehaivor;
 begin
   Result := inherited;
   if Result then Exit; // allow the ancestor to handle keys
@@ -253,9 +291,17 @@ begin
   {$IFDEF DEBUG}
     if Event.IsKey(keyEnter) then
     begin
-      Tuberia := TuberiaFactory.ComponentLoad(FreeAtStop) as TCastleTransform;
-      Tuberias.Add(Tuberia);
-      Tuberia.Translation :=Vector3(0,0,0);
+      TuberiaDesign := TTuberiaDesign.Create;
+      Try
+
+        Tuberia := TuberiaFactory.ComponentLoad(FreeAtStop,TuberiaDesign) as TCastleTransform;
+        TuberiaDesign.TuberiaBehaivor.AfterCreate(-150,50);
+      finally
+        FreeAndNil(TuberiaDesign);
+      end;
+
+
+
       Exit(true);
     end;
   {$ENDIF}
